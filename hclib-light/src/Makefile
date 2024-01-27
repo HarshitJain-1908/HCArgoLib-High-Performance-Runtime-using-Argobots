@@ -1,5 +1,5 @@
 argobots = argobots-runtime
-all: $(argobots)
+all: clean $(argobots)
 argobots-runtime:
 	gcc -I$(ARGOBOTS_INSTALL_DIR) -o argobots-runtime argobots-runtime.c
 clean:
