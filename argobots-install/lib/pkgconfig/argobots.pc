@@ -1,0 +1,13 @@
+prefix=/home/harshit/HCArgoLib/argobots-install
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: Argobots
+Description: A Lightweight Low-level Threading/Tasking Framework
+Version: 1.2rc1
+URL: http://www.argobots.org/
+Requires:
+Libs: -L${libdir} -labt
+Libs.private: -lrt -ldl -lpthread 
+Cflags: -I${includedir}
