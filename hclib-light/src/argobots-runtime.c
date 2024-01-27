@@ -6,6 +6,6 @@
 
 int main(int argc, char **argv) {
 
-    printf("Hello HCArgoLib \n");
+    printf("Hello HCArgoLib\n");
     return 0;
 }
