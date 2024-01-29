@@ -5,102 +5,137 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdarg.h>
+#include <pthread.h>
 #include <abt.h>
+// #include "abt.h"
 
-#define DEFAULT_NUM_XSTREAMS 2
-#define DEFAULT_NUM_THREADS 8
+typedef struct unit_t unit_t;
+typedef struct pool_t pool_t;
 
-typedef struct {
-    int tid;
-} thread_arg_t;
+struct unit_t {
+    unit_t *p_prev;
+    unit_t *p_next;
+    ABT_thread thread;
+};
 
-void hello_world(void *arg)
+struct pool_t {
+    pthread_mutex_t lock;
+    unit_t *p_head;
+    unit_t *p_tail;
+};
+
+/* Pool functions */
+static ABT_unit pool_create_unit(ABT_pool pool, ABT_thread thread)
 {
-    int tid = ((thread_arg_t *)arg)->tid;
-    int rank;
-    //ABT_xstream_self_rank(&rank);
-    printf("Hello world! (thread = %d, ES = %d)\n", tid, rank);
+    unit_t *p_unit = (unit_t *)calloc(1, sizeof(unit_t));
+    if (!p_unit)
+        return ABT_UNIT_NULL;
+    p_unit->thread = thread;
+    return (ABT_unit)p_unit;
 }
 
+static void pool_free_unit(ABT_pool pool, ABT_unit unit)
+{
+    unit_t *p_unit = (unit_t *)unit;
+    free(p_unit);
+}
 
-int main(int argc, char **argv) {
+static ABT_bool pool_is_empty(ABT_pool pool)
+{
+    pool_t *p_pool;
+    ABT_pool_get_data(pool, (void **)&p_pool);
+    return p_pool->p_head ? ABT_FALSE : ABT_TRUE;
+}
 
-    printf("Hello! HCArgoLib\n");
-    printf("Number of ES = %d \n", DEFAULT_NUM_XSTREAMS);
-    printf("Number of ULTs = %d \n", DEFAULT_NUM_THREADS);
-
-    int i, j;
-    /* Read arguments. */
-    int num_xstreams = DEFAULT_NUM_XSTREAMS;
-    int num_threads = DEFAULT_NUM_THREADS;
-    
-     /* Allocate memory. */
-    ABT_xstream *xstreams =
-        (ABT_xstream *)malloc(sizeof(ABT_xstream) * num_xstreams);
-    ABT_pool *pools = (ABT_pool *)malloc(sizeof(ABT_pool) * num_xstreams);
-    ABT_sched *scheds = (ABT_sched *)malloc(sizeof(ABT_sched) * num_xstreams);
-    ABT_thread *threads =
-        (ABT_thread *)malloc(sizeof(ABT_thread) * num_threads);
-    thread_arg_t *thread_args =
-        (thread_arg_t *)malloc(sizeof(thread_arg_t) * num_threads);
-
-    /* Initialize Argobots. */
-    ABT_init(argc, argv);
-
-    /* Create pools. */
-    for (i = 0; i < num_xstreams; i++) {
-        ABT_pool_create_basic(ABT_POOL_FIFO, ABT_POOL_ACCESS_MPMC, ABT_TRUE,
-                              &pools[i]);
+static ABT_thread pool_pop(ABT_pool pool, ABT_pool_context context)
+{
+    pool_t *p_pool;
+    ABT_pool_get_data(pool, (void **)&p_pool);
+    unit_t *p_unit = NULL;
+    pthread_mutex_lock(&p_pool->lock);
+    if (p_pool->p_head == NULL) {
+        /* Empty. */
+    } else if (p_pool->p_head == p_pool->p_tail) {
+        /* Only one thread. */
+        p_unit = p_pool->p_head;
+        p_pool->p_head = NULL;
+        p_pool->p_tail = NULL;
+    } else if (context & ABT_POOL_CONTEXT_OWNER_SECONDARY) {
+        /* Pop from the tail. */
+        p_unit = p_pool->p_tail;
+        p_pool->p_tail = p_unit->p_next;
+    } else {
+        /* Pop from the head. */
+        p_unit = p_pool->p_head;
+        p_pool->p_head = p_unit->p_prev;
     }
+    pthread_mutex_unlock(&p_pool->lock);
+    if (!p_unit)
+        return ABT_THREAD_NULL;
+    return p_unit->thread;
+}
 
-    /* Create schedulers. */
-    for (i = 0; i < num_xstreams; i++) {
-        ABT_pool *tmp = (ABT_pool *)malloc(sizeof(ABT_pool) * num_xstreams);
-        for (j = 0; j < num_xstreams; j++) {
-            tmp[j] = pools[(i + j) % num_xstreams];
-        }
-        ABT_sched_create_basic(ABT_SCHED_DEFAULT, num_xstreams, tmp,
-                               ABT_SCHED_CONFIG_NULL, &scheds[i]);
-        free(tmp);
+static void pool_push(ABT_pool pool, ABT_unit unit, ABT_pool_context context)
+{
+    pool_t *p_pool;
+    ABT_pool_get_data(pool, (void **)&p_pool);
+    unit_t *p_unit = (unit_t *)unit;
+
+    /* Lockless push to the pool. */
+
+    if (p_pool->p_head) {
+        p_unit->p_prev = p_pool->p_head;
+        p_pool->p_head->p_next = p_unit;
+    } else {
+        p_pool->p_tail = p_unit;
     }
+    p_pool->p_head = p_unit;
+}
 
-    /* Set up a primary execution stream. */
-    ABT_xstream_self(&xstreams[0]);
-    ABT_xstream_set_main_sched(xstreams[0], scheds[0]);
+static int pool_init(ABT_pool pool, ABT_pool_config config)
+{
+    pool_t *p_pool = (pool_t *)calloc(1, sizeof(pool_t));
+    if (!p_pool)
+        return ABT_ERR_MEM;
 
-    /* Create secondary execution streams. */
-    for (i = 1; i < num_xstreams; i++) {
-        ABT_xstream_create(scheds[i], &xstreams[i]);
+    /* Initialize the spinlock */
+    int ret = pthread_mutex_init(&p_pool->lock, 0);
+    if (ret != 0) {
+        free(p_pool);
+        return ABT_ERR_SYS;
     }
+    ABT_pool_set_data(pool, (void *)p_pool);
+    return ABT_SUCCESS;
+}
 
-    /* Create ULTs. */
-    for (i = 0; i < num_threads; i++) {
-        int pool_id = i % num_xstreams;
-        thread_args[i].tid = i;
-        ABT_thread_create(pools[pool_id], hello_world, &thread_args[i],
-                          ABT_THREAD_ATTR_NULL, &threads[i]);
+static void pool_free(ABT_pool pool)
+{
+    pool_t *p_pool;
+    ABT_pool_get_data(pool, (void **)&p_pool);
+    pthread_mutex_destroy(&p_pool->lock);
+    free(p_pool);
+}
+
+static void create_pools(int num, ABT_pool *pools) //to be called in HClib::initialize()
+{
+    /* Pool definition */
+    ABT_pool_user_def def;
+    ABT_pool_user_def_create(pool_create_unit, pool_free_unit, pool_is_empty,
+                             pool_pop, pool_push, &def);
+    ABT_pool_user_def_set_init(def, pool_init);
+    ABT_pool_user_def_set_free(def, pool_free);
+    /* Pool configuration */
+    ABT_pool_config config;
+    ABT_pool_config_create(&config);
+    /* The same as a pool created by ABT_pool_create_basic(). */
+    const int automatic = 1;
+    ABT_pool_config_set(config, ABT_pool_config_automatic.key,
+                        ABT_pool_config_automatic.type, &automatic);
+
+    int i;
+    for (i = 0; i < num; i++) {
+        ABT_pool_create(def, config, &pools[i]);
     }
-
-    /* Join and free ULTs. */
-    for (i = 0; i < num_threads; i++) {
-        ABT_thread_free(&threads[i]);
-    }
-
-    /* Join secondary execution streams. */
-    for (i = 1; i < num_xstreams; i++) {
-        ABT_xstream_join(xstreams[i]);
-        ABT_xstream_free(&xstreams[i]);
-    }
-
-    /* Finalize Argobots. */
-    ABT_finalize();
-
-    /* Free allocated memory. */
-    free(xstreams);
-    free(pools);
-    free(scheds);
-    free(threads);
-    free(thread_args);
-
-    return 0;
+    ABT_pool_user_def_free(&def);
+    ABT_pool_config_free(&config);
 }
