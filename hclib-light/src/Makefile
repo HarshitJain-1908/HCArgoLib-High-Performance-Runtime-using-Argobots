@@ -1,6 +1,6 @@
 argobots = argobots-runtime
 all: clean $(argobots)
 argobots-runtime:
-	gcc -I$(ARGOBOTS_INSTALL_DIR)/argobots-install/include/ -L$(ARGOBOTS_INSTALL_DIR)/argobots-install/lib/ -labt -o argobots-runtime argobots-runtime.c
+	gcc -I$(ARGOBOTS_INSTALL_DIR)/include/ -L$(ARGOBOTS_INSTALL_DIR)/lib -o argobots-runtime argobots-runtime.c -labt -lpthread
 clean:
 	rm -rf *.o $(argobots)
