@@ -9,6 +9,9 @@
 // #include <abt.h>
 #include "abt.h"
 
+#define NUM_XSTREAMS 4
+#define NUM_THREADS 4
+
 typedef struct unit_t unit_t;
 typedef struct pool_t pool_t;
 
@@ -242,7 +245,71 @@ static void create_pools(int num, ABT_pool *pools) //to be called in HClib::init
     ABT_pool_config_free(&config);
 }
 
-int main() {
+
+typedef struct {
+    int tid;
+} thread_arg_t;
+
+void hello_world(void *arg)
+{
+    int tid = ((thread_arg_t *)arg)->tid;
+    printf("Hello world! (thread = %d)\n", tid);
+}
+
+int main(int argc, char *argv[]) {
+
+    ABT_xstream xstreams[NUM_XSTREAMS];
+    ABT_sched scheds[NUM_XSTREAMS];
+    ABT_pool pools[NUM_XSTREAMS];
+    ABT_thread threads[NUM_XSTREAMS];
+    int i;
+
+    ABT_init(argc, argv);
+
+    /* Create pools */
+    create_pools(NUM_XSTREAMS, pools);
+
+    /* Create schedulers */
+    create_scheds(NUM_XSTREAMS, pools, scheds);
+
+    /* Create ESs */
+    ABT_xstream_self(&xstreams[0]);
+    ABT_xstream_set_main_sched(xstreams[0], scheds[0]);
+    for (i = 1; i < NUM_XSTREAMS; i++) {
+        ABT_xstream_create(scheds[i], &xstreams[i]);
+    }
+
+    thread_arg_t *thread_args =
+        (thread_arg_t *)malloc(sizeof(thread_arg_t) * NUM_XSTREAMS);
+
+    /* Create ULTs. */
+    for (i = 0; i < NUM_XSTREAMS; i++) {
+        int pool_id = i % NUM_XSTREAMS;
+        thread_args[i].tid = i;
+        ABT_thread_create(pools[pool_id], hello_world, &thread_args[i],
+                          ABT_THREAD_ATTR_NULL, &threads[i]);
+    }
+
+    /* Join & Free */
+    for (i = 0; i < NUM_XSTREAMS; i++) {
+        ABT_thread_join(threads[i]);
+        ABT_thread_free(&threads[i]);
+    }
+    for (i = 1; i < NUM_XSTREAMS; i++) {
+        ABT_xstream_join(xstreams[i]);
+        ABT_xstream_free(&xstreams[i]);
+    }
+
+    /* Free schedulers */
+    /* Note that we do not need to free the scheduler for the primary ES,
+     * i.e., xstreams[0], because its scheduler will be automatically freed in
+     * ABT_finalize(). */
+    for (i = 1; i < NUM_XSTREAMS; i++) {
+        ABT_sched_free(&scheds[i]);
+    }
+
+    /* Finalize */
+    ABT_finalize();
 
     return 0;
 }
