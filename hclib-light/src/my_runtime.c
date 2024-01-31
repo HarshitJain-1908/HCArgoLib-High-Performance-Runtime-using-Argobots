@@ -3,10 +3,11 @@
 #include <unistd.h>
 #include <stdarg.h>
 #include <pthread.h>
+#include "my_runtime.h"
 #include "abt.h"
 
 #define NUM_XSTREAMS 4
-#define NUM_ULTS 8
+// #define NUM_ULTS 8
 
 //============================================================  POOL STRUCTURE AND OPERATIONS =====================================================
 
@@ -24,6 +25,12 @@ struct pool_t {
     unit_t *p_head;
     unit_t *p_tail;
 };
+
+// const int NUM_XSTREAMS = 4;
+ABT_xstream xstreams[NUM_XSTREAMS];
+ABT_sched scheds[NUM_XSTREAMS];
+ABT_pool pools[NUM_XSTREAMS];
+
 
 /* Pool functions */
 static ABT_unit pool_create_unit(ABT_pool pool, ABT_thread thread)
@@ -255,13 +262,8 @@ void hello_world(void *arg)
     printf("Hello world! (thread = %d)\n", tid);
 }
 
-int main(int argc, char *argv[])
-{
-    ABT_xstream xstreams[NUM_XSTREAMS];
-    ABT_sched scheds[NUM_XSTREAMS];
-    ABT_pool pools[NUM_XSTREAMS];
-    ABT_thread threads[NUM_ULTS];
-    int i;
+
+void HCArgoLib_init(int argc, char *argv[]) {
 
     ABT_init(argc, argv);
 
@@ -275,25 +277,15 @@ int main(int argc, char *argv[])
     ABT_xstream_self(&xstreams[0]);
     ABT_xstream_set_main_sched(xstreams[0], scheds[0]);
     
-    for (i = 1; i < NUM_XSTREAMS; i++) {
+    for (int i = 1; i < NUM_XSTREAMS; i++) {
         ABT_xstream_create(scheds[i], &xstreams[i]);
     }
 
-    thread_arg_t *thread_args = (thread_arg_t *)malloc(sizeof(thread_arg_t) * NUM_ULTS);
+}
 
-    /* Create ULTs */
-    for (i = 0; i < NUM_ULTS; i++) {
-        int pool_id = i % NUM_XSTREAMS;
-        thread_args[i].tid = i;
-        ABT_thread_create(pools[pool_id], hello_world, &thread_args[i],
-                          ABT_THREAD_ATTR_NULL, &threads[i]);
-    }
+void HCArgoLib_finalize() {
 
-    /* Join & Free */
-    for (i = 0; i < NUM_ULTS; i++) {
-        ABT_thread_free(&threads[i]);
-    }
-    for (i = 1; i < NUM_XSTREAMS; i++) {
+    for (int i = 1; i < NUM_XSTREAMS; i++) {
         ABT_xstream_join(xstreams[i]);
         ABT_xstream_free(&xstreams[i]);
     }
@@ -302,12 +294,34 @@ int main(int argc, char *argv[])
     /* Note that we do not need to free the scheduler for the primary ES,
      * i.e., xstreams[0], because its scheduler will be automatically freed in
      * ABT_finalize(). */
-    for (i = 1; i < NUM_XSTREAMS; i++) {
+    for (int i = 1; i < NUM_XSTREAMS; i++) {
         ABT_sched_free(&scheds[i]);
     }
 
     /* Finalize */
     ABT_finalize();
+
+}
+
+
+int main(int argc, char *argv[])
+{
+    
+
+    // thread_arg_t *thread_args = (thread_arg_t *)malloc(sizeof(thread_arg_t) * NUM_ULTS);
+
+    // /* Create ULTs */
+    // for (i = 0; i < NUM_ULTS; i++) {
+    //     int pool_id = i % NUM_XSTREAMS;
+    //     thread_args[i].tid = i;
+    //     ABT_thread_create(pools[pool_id], hello_world, &thread_args[i],
+    //                       ABT_THREAD_ATTR_NULL, &threads[i]);
+    // }
+
+    // /* Join & Free */
+    // for (i = 0; i < NUM_ULTS; i++) {
+    //     ABT_thread_free(&threads[i]);
+    // }
 
     return 0;
 }
