@@ -7,13 +7,12 @@ int fib(int  n) {
 
     if (n < 2) return n;
 
-    HCArgoLib_start_finish() ;
+    // HCArgoLib_start_finish() ;
 
-    int x = HCArgoLib_create_ULT(n-1);
-
-    int y = fib(n-2);
-
-    HCArgoLib_end_finish();
+    HCArgoLib_finish([&]() {
+        int x = HCArgoLib_async();
+        int y = fib(n-2);
+    });
     
     return x + y;
 
