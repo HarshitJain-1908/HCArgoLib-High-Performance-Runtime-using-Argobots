@@ -7,7 +7,7 @@
 #include "abt.h"
 
 #define NUM_XSTREAMS 4
-// #define NUM_ULTS 8
+static double user_specified_timer = 0;
 
 //============================================================  POOL STRUCTURE AND OPERATIONS =====================================================
 
@@ -26,11 +26,9 @@ struct pool_t {
     unit_t *p_tail;
 };
 
-// const int NUM_XSTREAMS = 4;
 ABT_xstream xstreams[NUM_XSTREAMS];
 ABT_sched scheds[NUM_XSTREAMS];
 ABT_pool pools[NUM_XSTREAMS];
-
 
 /* Pool functions */
 static ABT_unit pool_create_unit(ABT_pool pool, ABT_thread thread)
@@ -252,19 +250,15 @@ static void create_scheds(int num, ABT_pool *pools, ABT_sched *scheds)
     ABT_sched_config_free(&config);
 }
 
-typedef struct {
-    int tid;
-} thread_arg_t;
-
-void hello_world(void *arg)
-{
-    int tid = ((thread_arg_t *)arg)->tid;
-    printf("Hello world! (thread = %d)\n", tid);
+double mysecond() {
+    struct timeval tv;
+    gettimeofday(&tv, 0);
+    return tv.tv_sec + ((double) tv.tv_usec / 1000000);
 }
 
+//=========================================================  MAIN FUNCTIONS ====================================================
 
 void HCArgoLib_init(int argc, char *argv[]) {
-
     ABT_init(argc, argv);
 
     /* Create pools */
@@ -280,48 +274,64 @@ void HCArgoLib_init(int argc, char *argv[]) {
     for (int i = 1; i < NUM_XSTREAMS; i++) {
         ABT_xstream_create(scheds[i], &xstreams[i]);
     }
-
 }
 
 void HCArgoLib_finalize() {
-
     for (int i = 1; i < NUM_XSTREAMS; i++) {
         ABT_xstream_join(xstreams[i]);
         ABT_xstream_free(&xstreams[i]);
     }
 
-    /* Free schedulers */
-    /* Note that we do not need to free the scheduler for the primary ES,
-     * i.e., xstreams[0], because its scheduler will be automatically freed in
-     * ABT_finalize(). */
     for (int i = 1; i < NUM_XSTREAMS; i++) {
         ABT_sched_free(&scheds[i]);
     }
 
     /* Finalize */
     ABT_finalize();
-
 }
 
+void HCArgoLib_kernel(generic_frame_ptr fct_ptr, void * arg) {
+    // ABT_thread threads;
+    // ABT_xstream xstream;
+    // int rank;
 
-int main(int argc, char *argv[])
-{
-    
+    // ABT_xstream_self(&xstream);
+    // ABT_xstream_get_rank(xstream, &rank);
 
-    // thread_arg_t *thread_args = (thread_arg_t *)malloc(sizeof(thread_arg_t) * NUM_ULTS);
+    double start = mysecond();
+    // ABT_thread_create(pools[rank], fct_ptr, (void *)arg, ABT_THREAD_ATTR_NULL, &threads);
+    // ABT_thread_free(&threads);
+    fct_ptr(arg);
 
-    // /* Create ULTs */
-    // for (i = 0; i < NUM_ULTS; i++) {
-    //     int pool_id = i % NUM_XSTREAMS;
-    //     thread_args[i].tid = i;
-    //     ABT_thread_create(pools[pool_id], hello_world, &thread_args[i],
-    //                       ABT_THREAD_ATTR_NULL, &threads[i]);
-    // }
-
-    // /* Join & Free */
-    // for (i = 0; i < NUM_ULTS; i++) {
-    //     ABT_thread_free(&threads[i]);
-    // }
-
-    return 0;
+    user_specified_timer = (mysecond() - start)*1000;
+    // free(threads);
 }
+
+void HCArgoLib_finish(generic_frame_ptr fct_ptr, void * arg) {
+    // ABT_thread threads;
+    // ABT_xstream xstream;
+    // int rank;
+
+    // ABT_xstream_self(&xstream);
+    // ABT_xstream_get_rank(xstream, &rank);
+    fct_ptr(arg);
+    // ABT_thread_create(pools[rank], fct_ptr, (void *)arg, ABT_THREAD_ATTR_NULL, &threads);
+
+    // ABT_thread_free(&threads);
+    // free(threads);
+}
+
+void HCArgoLib_async(generic_frame_ptr fct_ptr, void * arg){
+    ABT_thread threads;
+    ABT_xstream xstream;
+    int rank;
+
+    ABT_xstream_self(&xstream);
+    ABT_xstream_get_rank(xstream, &rank);
+
+    ABT_thread_create(pools[rank], fct_ptr, (void *)arg, ABT_THREAD_ATTR_NULL, &threads);
+
+    ABT_thread_free(&threads);
+    free(threads);
+}
+
