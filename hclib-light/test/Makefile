@@ -1,6 +1,6 @@
 include $(HCLIB_ROOT)/include/hclib.mak
 
-TARGETS := fib fib-reducer
+TARGETS := fib fib-reducer prime
 
 all: clean $(TARGETS) clean-obj
 

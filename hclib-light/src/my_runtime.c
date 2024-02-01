@@ -7,6 +7,10 @@
 #include "abt.h"
 
 #define NUM_XSTREAMS 4
+
+ABT_xstream xstreams[NUM_XSTREAMS];
+ABT_sched scheds[NUM_XSTREAMS];
+ABT_pool pools[NUM_XSTREAMS];
 static double user_specified_timer = 0;
 
 //============================================================  POOL STRUCTURE AND OPERATIONS =====================================================
@@ -25,10 +29,6 @@ struct pool_t {
     unit_t *p_head;
     unit_t *p_tail;
 };
-
-ABT_xstream xstreams[NUM_XSTREAMS];
-ABT_sched scheds[NUM_XSTREAMS];
-ABT_pool pools[NUM_XSTREAMS];
 
 /* Pool functions */
 static ABT_unit pool_create_unit(ABT_pool pool, ABT_thread thread)
@@ -298,24 +298,24 @@ void hclib_finalize() {
 
 void hclib_kernel(generic_frame_ptr fct_ptr, void * arg) {
     printf("\nEntered kernel\n");
-    ABT_thread threads;
-    ABT_xstream xstream;
-    int rank;
+    // ABT_thread threads;
+    // ABT_xstream xstream;
+    // int rank;
 
-    ABT_xstream_self(&xstream);
-    ABT_xstream_get_rank(xstream, &rank);
+    // ABT_xstream_self(&xstream);
+    // ABT_xstream_get_rank(xstream, &rank);
 
     double start = mysecond();
-    ABT_thread_create(pools[rank], fct_ptr, (void *)arg, ABT_THREAD_ATTR_NULL, &threads);
-    ABT_thread_free(&threads);
-    
-    // fct_ptr(arg);
+    // ABT_thread_create(pools[rank], fct_ptr, (void *)arg, ABT_THREAD_ATTR_NULL, &threads);
     printf("\nExecuting kernel ........\n");
+    // ABT_thread_free(&threads);
+    
+    fct_ptr(arg);
     user_specified_timer = (mysecond() - start)*1000;
-    free(threads);
 }
 
 void hclib_finish(generic_frame_ptr fct_ptr, void * arg) {
+    // printf("\nEntered finish scope");
     // ABT_thread threads;
     // ABT_xstream xstream;
     // int rank;
@@ -323,11 +323,10 @@ void hclib_finish(generic_frame_ptr fct_ptr, void * arg) {
     // ABT_xstream_self(&xstream);
     // ABT_xstream_get_rank(xstream, &rank);
     fct_ptr(arg);
+    ABT_thread_create(pools[rank], fct_ptr, (void *)arg, ABT_THREAD_ATTR_NULL, &threads);
     printf("\nExecuting finish ........\n");
-    // ABT_thread_create(pools[rank], fct_ptr, (void *)arg, ABT_THREAD_ATTR_NULL, &threads);
 
     // ABT_thread_free(&threads);
-    // free(threads);
 }
 
 void hclib_async(generic_frame_ptr fct_ptr, void * arg){
@@ -341,6 +340,5 @@ void hclib_async(generic_frame_ptr fct_ptr, void * arg){
     ABT_thread_create(pools[rank], fct_ptr, (void *)arg, ABT_THREAD_ATTR_NULL, &threads);
 
     ABT_thread_free(&threads);
-    free(threads);
 }
 
