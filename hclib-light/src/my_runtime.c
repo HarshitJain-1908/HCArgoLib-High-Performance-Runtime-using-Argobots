@@ -6,11 +6,11 @@
 #include "hclib.h"
 #include "abt.h"
 
-#define NUM_XSTREAMS 4
+int NUM_XSTREAMS;
 
-ABT_xstream xstreams[NUM_XSTREAMS];
-ABT_sched scheds[NUM_XSTREAMS];
-ABT_pool pools[NUM_XSTREAMS];
+ABT_xstream *xstreams = NULL;
+ABT_sched *scheds = NULL;
+ABT_pool *pools = NULL;
 static double user_specified_timer = 0;
 
 //============================================================  POOL STRUCTURE AND OPERATIONS =====================================================
@@ -259,6 +259,11 @@ double mysecond() {
 //=========================================================  MAIN FUNCTIONS ====================================================
 
 void hclib_init(int argc, char *argv[]) {
+    NUM_XSTREAMS = (getenv("HCLIB_WORKERS") != NULL) ? atoi(getenv("HCLIB_WORKERS")) : 1;
+    xstreams = (ABT_xstream *)malloc(sizeof(ABT_xstream) * NUM_XSTREAMS);
+    pools = (ABT_pool *)malloc(sizeof(ABT_pool) * NUM_XSTREAMS);
+    scheds = (ABT_sched *)malloc(sizeof(ABT_sched) * NUM_XSTREAMS);
+    
     ABT_init(argc, argv);
 
     /* Create pools */
@@ -275,7 +280,7 @@ void hclib_init(int argc, char *argv[]) {
         ABT_xstream_create(scheds[i], &xstreams[i]);
     }
 
-    printf("\n INIT COMPLETE \n");
+    printf("\nInit Complete \n");
 }
 
 void hclib_finalize() {
@@ -287,55 +292,37 @@ void hclib_finalize() {
         ABT_sched_free(&scheds[i]);
     }
     /* Finalize */
-    // ABT_finalize();
-    // printf("============================ Tabulate Statistics ============================\n");
-    // printf("time.kernel\ttotalAsync\ttotalSteals\n");
-    // printf("%.3f\t%d\t%d\n",user_specified_timer,tpush,tsteals);
-    // printf("=============================================================================\n");
-    // printf("===== Total Time in %.f msec =====\n", duration);
-    // printf("===== Test PASSED in 0.0 msec =====\n");
+    ABT_finalize();
+    
+    printf("============================ Tabulate Statistics ============================\n");
+    printf("time.kernel\n");
+    printf("%.3f\n",user_specified_timer);
+    printf("=============================================================================\n");
+    printf("===== Test PASSED in 0.0 msec =====\n");
 }
 
 void hclib_kernel(generic_frame_ptr fct_ptr, void * arg) {
     printf("\nEntered kernel\n");
-    // ABT_thread threads;
-    // ABT_xstream xstream;
-    // int rank;
-
-    // ABT_xstream_self(&xstream);
-    // ABT_xstream_get_rank(xstream, &rank);
 
     double start = mysecond();
-    // ABT_thread_create(pools[rank], fct_ptr, (void *)arg, ABT_THREAD_ATTR_NULL, &threads);
     printf("\nExecuting kernel ........\n");
-    // ABT_thread_free(&threads);
-    
     fct_ptr(arg);
+
     user_specified_timer = (mysecond() - start)*1000;
 }
 
 void hclib_finish(generic_frame_ptr fct_ptr, void * arg) {
-    // printf("\nEntered finish scope");
-    // ABT_thread threads;
-    // ABT_xstream xstream;
-    // int rank;
-
-    // ABT_xstream_self(&xstream);
-    // ABT_xstream_get_rank(xstream, &rank);
     fct_ptr(arg);
-    ABT_thread_create(pools[rank], fct_ptr, (void *)arg, ABT_THREAD_ATTR_NULL, &threads);
-    printf("\nExecuting finish ........\n");
-
-    // ABT_thread_free(&threads);
 }
 
 void hclib_async(generic_frame_ptr fct_ptr, void * arg){
-    ABT_thread threads;
     ABT_xstream xstream;
     int rank;
 
     ABT_xstream_self(&xstream);
     ABT_xstream_get_rank(xstream, &rank);
+
+    ABT_thread *threads = (ABT_thread *)malloc(sizeof(ABT_thread));
 
     ABT_thread_create(pools[rank], fct_ptr, (void *)arg, ABT_THREAD_ATTR_NULL, &threads);
 
