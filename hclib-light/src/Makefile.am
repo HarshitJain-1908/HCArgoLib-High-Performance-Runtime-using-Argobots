@@ -1,12 +1,12 @@
 SUBDIRS =
 
 # Includes folders
-INCLUDES_DIR = -I$(top_srcdir)/inc -I$(top_srcdir)/src/inc
+INCLUDES_DIR = -I$(top_srcdir)/inc -I$(top_srcdir)/src/inc -I$(ARGOBOTS_INSTALL_DIR)include
 
 # cflags: important to define that otherwise we inherit default values too
 CFLAGS = -Wall -g -O3 -std=c11
 CXXFLAGS = -Wall -g -O3 -std=c++11
-LDFLAGS = -lpthread
+LDFLAGS = -labt -lpthread
 
 # build the hclib library
 lib_LTLIBRARIES = libhclib.la
@@ -15,9 +15,9 @@ lib_LTLIBRARIES = libhclib.la
 noinst_LTLIBRARIES =
 libhclib_la_LIBADD =
 
-AM_CXXFLAGS = 
+AM_CXXFLAGS = -L$(ARGOBOTS_INSTALL_DIR)lib -Wl,-rpath,$(ARGOBOTS_INSTALL_DIR)lib
 
-libhclib_la_SOURCES = hclib-runtime.c hclib-deque.c hclib_cpp.cpp
+libhclib_la_SOURCES = my_runtime.c hclib_cpp.cpp
 
 # build hclib
 libhclib_la_CXXFLAGS= $(CXXFLAGS) $(INCLUDES_DIR) $(AM_CXXFLAGS)
