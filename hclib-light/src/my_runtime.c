@@ -12,6 +12,9 @@ ABT_sched *scheds = NULL;
 ABT_pool *pools = NULL;
 static double user_specified_timer = 0;
 
+int steals = 0, pops = 0, push = 0;
+pthread_mutex_t mutex;
+
 //============================================================  POOL STRUCTURE AND OPERATIONS =====================================================
 
 typedef struct unit_t unit_t;
@@ -182,6 +185,9 @@ static void sched_run(ABT_sched sched)
         ABT_pool_pop_thread(pools[0], &thread);
         if (thread != ABT_THREAD_NULL) {
             /* "thread" is associated with its original pool (pools[0]). */
+            pthread_mutex_lock(&mutex);
+            pops++;
+            pthread_mutex_unlock(&mutex);
             ABT_self_schedule(thread, ABT_POOL_NULL);
         } else if (num_pools > 1) {
             /* Steal a work unit from other pools */
@@ -191,6 +197,12 @@ static void sched_run(ABT_sched sched)
             if (thread != ABT_THREAD_NULL) {
                 /* "thread" is associated with its original pool
                  * (pools[target]). */
+                pthread_mutex_lock(&mutex);
+                steals++;
+                pthread_mutex_unlock(&mutex);
+                // int rank;
+                // ABT_self_get_xstream_rank(&rank);
+                // printf("task stolen by ES: %d\n", rank);
                 ABT_self_schedule(thread, pools[target]);
             }
         }
@@ -259,12 +271,14 @@ double mysecond() {
 
 void hclib_init(int argc, char *argv[]) {
     NUM_XSTREAMS = (getenv("HCLIB_WORKERS") != NULL) ? atoi(getenv("HCLIB_WORKERS")) : 1;
-    printf("exec streams: %d\n", NUM_XSTREAMS);
+    // printf("exec streams: %d\n", NUM_XSTREAMS);
     xstreams = (ABT_xstream *)malloc(sizeof(ABT_xstream) * NUM_XSTREAMS);
     pools = (ABT_pool *)malloc(sizeof(ABT_pool) * NUM_XSTREAMS);
     scheds = (ABT_sched *)malloc(sizeof(ABT_sched) * NUM_XSTREAMS);
     
     ABT_init(argc, argv);
+
+    pthread_mutex_init(&mutex, NULL);
 
     /* Create pools */
     create_pools(NUM_XSTREAMS, pools);
@@ -280,35 +294,7 @@ void hclib_init(int argc, char *argv[]) {
         ABT_xstream_create(scheds[i], &xstreams[i]);
     }
 
-    printf("\n====== Initialization Complete ======\n");
-}
-
-void hclib_finalize() {
-    for (int i = 1; i < NUM_XSTREAMS; i++) {
-        ABT_xstream_join(xstreams[i]);
-        ABT_xstream_free(&xstreams[i]);
-    }
-    for (int i = 1; i < NUM_XSTREAMS; i++) {
-        ABT_sched_free(&scheds[i]);
-    }
-
-    /* Finalize */
-    ABT_finalize();
-
-    printf("============================ Tabulate Statistics ============================\n");
-    printf("Kernel execution time = %.3f s\n",user_specified_timer);
-    printf("=============================================================================\n");
-    // printf("===== Test PASSED in 0.0 msec =====\n");
-}
-
-void hclib_kernel(generic_frame_ptr fct_ptr, void * arg) {
-    printf("Executing kernel...\n");
-
-    double start = mysecond();
-    fct_ptr(arg);
-    user_specified_timer = (mysecond() - start)*1000;
-
-    printf("\n===== Kernel execution complete =====\n");
+    printf("\n====== HCArgoLib Runtime Initialized ======\n\n");
 }
 
 void hclib_finish(generic_frame_ptr fct_ptr, void * arg) {
@@ -324,8 +310,42 @@ void hclib_async(generic_frame_ptr fct_ptr, void * arg){
 
     ABT_thread *threads = (ABT_thread *)malloc(sizeof(ABT_thread));
 
+    pthread_mutex_lock(&mutex);
+    push++;
+    pthread_mutex_unlock(&mutex);
+
     ABT_thread_create(pools[rank], fct_ptr, (void *)arg, ABT_THREAD_ATTR_NULL, &threads);
 
     ABT_thread_free(&threads);
 }
 
+
+void hclib_finalize() {
+    for (int i = 1; i < NUM_XSTREAMS; i++) {
+        ABT_xstream_join(xstreams[i]);
+        ABT_xstream_free(&xstreams[i]);
+    }
+    for (int i = 1; i < NUM_XSTREAMS; i++) {
+        ABT_sched_free(&scheds[i]);
+    }
+
+    pthread_mutex_destroy(&mutex);
+
+    /* Finalize */
+    ABT_finalize();
+
+    printf("\n====== Tabulate Statistics ======\n");
+    printf("\nKernel execution time = %.3fs\n",user_specified_timer);
+    printf("push: %d, pops: %d, steals: %d\n", push, pops, steals);
+    printf("\n====== HCArgoLib Runtime Finalized ======\n\n");
+}
+
+void hclib_kernel(generic_frame_ptr fct_ptr, void * arg) {
+    printf("Executing kernel..\n");
+
+    double start = mysecond();
+    fct_ptr(arg);
+    user_specified_timer = (mysecond() - start);
+
+    printf("\n====== Kernel execution complete ======\n");
+}
