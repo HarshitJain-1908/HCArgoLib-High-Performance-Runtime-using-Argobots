@@ -280,7 +280,7 @@ void hclib_init(int argc, char *argv[]) {
         ABT_xstream_create(scheds[i], &xstreams[i]);
     }
 
-    printf("\nInit Complete \n");
+    printf("\n====== Initialization Complete =====\n");
 }
 
 void hclib_finalize() {
@@ -291,9 +291,10 @@ void hclib_finalize() {
     for (int i = 1; i < NUM_XSTREAMS; i++) {
         ABT_sched_free(&scheds[i]);
     }
+
     /* Finalize */
     ABT_finalize();
-    
+
     printf("============================ Tabulate Statistics ============================\n");
     printf("time.kernel\n");
     printf("%.3f\n",user_specified_timer);
@@ -302,11 +303,12 @@ void hclib_finalize() {
 }
 
 void hclib_kernel(generic_frame_ptr fct_ptr, void * arg) {
-    printf("\nEntered kernel\n");
+    printf("\n====== Entered kernel =====");
 
     double start = mysecond();
     printf("\nExecuting kernel ........\n");
     fct_ptr(arg);
+    printf("\n===== Kernel execution complete =====\n");
 
     user_specified_timer = (mysecond() - start)*1000;
 }
