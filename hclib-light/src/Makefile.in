@@ -127,8 +127,8 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
 libhclib_la_DEPENDENCIES =
-am_libhclib_la_OBJECTS = libhclib_la-hclib-runtime.lo \
-	libhclib_la-hclib-deque.lo libhclib_la-hclib_cpp.lo
+am_libhclib_la_OBJECTS = libhclib_la-my_runtime.lo \
+	libhclib_la-hclib_cpp.lo
 libhclib_la_OBJECTS = $(am_libhclib_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -152,9 +152,8 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/libhclib_la-hclib-deque.Plo \
-	./$(DEPDIR)/libhclib_la-hclib-runtime.Plo \
-	./$(DEPDIR)/libhclib_la-hclib_cpp.Plo
+am__depfiles_remade = ./$(DEPDIR)/libhclib_la-hclib_cpp.Plo \
+	./$(DEPDIR)/libhclib_la-my_runtime.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -300,7 +299,7 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LD = @LD@
-LDFLAGS = -lpthread
+LDFLAGS = -labt -lpthread
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -389,7 +388,7 @@ top_srcdir = @top_srcdir@
 SUBDIRS = 
 
 # Includes folders
-INCLUDES_DIR = -I$(top_srcdir)/inc -I$(top_srcdir)/src/inc
+INCLUDES_DIR = -I$(top_srcdir)/inc -I$(top_srcdir)/src/inc -I$(ARGOBOTS_INSTALL_DIR)include
 
 # build the hclib library
 lib_LTLIBRARIES = libhclib.la
@@ -397,8 +396,8 @@ lib_LTLIBRARIES = libhclib.la
 # These are populated in sub-folder's Makefile.inc
 noinst_LTLIBRARIES = 
 libhclib_la_LIBADD = 
-AM_CXXFLAGS = 
-libhclib_la_SOURCES = hclib-runtime.c hclib-deque.c hclib_cpp.cpp
+AM_CXXFLAGS = -L$(ARGOBOTS_INSTALL_DIR)lib -Wl,-rpath,$(ARGOBOTS_INSTALL_DIR)lib
+libhclib_la_SOURCES = my_runtime.c hclib_cpp.cpp
 
 # build hclib
 libhclib_la_CXXFLAGS = $(CXXFLAGS) $(INCLUDES_DIR) $(AM_CXXFLAGS)
@@ -493,9 +492,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libhclib_la-hclib-deque.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libhclib_la-hclib-runtime.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libhclib_la-hclib_cpp.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libhclib_la-my_runtime.Plo@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -524,19 +522,12 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
 
-libhclib_la-hclib-runtime.lo: hclib-runtime.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libhclib_la_CFLAGS) $(CFLAGS) -MT libhclib_la-hclib-runtime.lo -MD -MP -MF $(DEPDIR)/libhclib_la-hclib-runtime.Tpo -c -o libhclib_la-hclib-runtime.lo `test -f 'hclib-runtime.c' || echo '$(srcdir)/'`hclib-runtime.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libhclib_la-hclib-runtime.Tpo $(DEPDIR)/libhclib_la-hclib-runtime.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='hclib-runtime.c' object='libhclib_la-hclib-runtime.lo' libtool=yes @AMDEPBACKSLASH@
+libhclib_la-my_runtime.lo: my_runtime.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libhclib_la_CFLAGS) $(CFLAGS) -MT libhclib_la-my_runtime.lo -MD -MP -MF $(DEPDIR)/libhclib_la-my_runtime.Tpo -c -o libhclib_la-my_runtime.lo `test -f 'my_runtime.c' || echo '$(srcdir)/'`my_runtime.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libhclib_la-my_runtime.Tpo $(DEPDIR)/libhclib_la-my_runtime.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='my_runtime.c' object='libhclib_la-my_runtime.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libhclib_la_CFLAGS) $(CFLAGS) -c -o libhclib_la-hclib-runtime.lo `test -f 'hclib-runtime.c' || echo '$(srcdir)/'`hclib-runtime.c
-
-libhclib_la-hclib-deque.lo: hclib-deque.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libhclib_la_CFLAGS) $(CFLAGS) -MT libhclib_la-hclib-deque.lo -MD -MP -MF $(DEPDIR)/libhclib_la-hclib-deque.Tpo -c -o libhclib_la-hclib-deque.lo `test -f 'hclib-deque.c' || echo '$(srcdir)/'`hclib-deque.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libhclib_la-hclib-deque.Tpo $(DEPDIR)/libhclib_la-hclib-deque.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='hclib-deque.c' object='libhclib_la-hclib-deque.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libhclib_la_CFLAGS) $(CFLAGS) -c -o libhclib_la-hclib-deque.lo `test -f 'hclib-deque.c' || echo '$(srcdir)/'`hclib-deque.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libhclib_la_CFLAGS) $(CFLAGS) -c -o libhclib_la-my_runtime.lo `test -f 'my_runtime.c' || echo '$(srcdir)/'`my_runtime.c
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -774,9 +765,8 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 	clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-recursive
-		-rm -f ./$(DEPDIR)/libhclib_la-hclib-deque.Plo
-	-rm -f ./$(DEPDIR)/libhclib_la-hclib-runtime.Plo
-	-rm -f ./$(DEPDIR)/libhclib_la-hclib_cpp.Plo
+		-rm -f ./$(DEPDIR)/libhclib_la-hclib_cpp.Plo
+	-rm -f ./$(DEPDIR)/libhclib_la-my_runtime.Plo
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -822,9 +812,8 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-recursive
-		-rm -f ./$(DEPDIR)/libhclib_la-hclib-deque.Plo
-	-rm -f ./$(DEPDIR)/libhclib_la-hclib-runtime.Plo
-	-rm -f ./$(DEPDIR)/libhclib_la-hclib_cpp.Plo
+		-rm -f ./$(DEPDIR)/libhclib_la-hclib_cpp.Plo
+	-rm -f ./$(DEPDIR)/libhclib_la-my_runtime.Plo
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
