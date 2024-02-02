@@ -1,0 +1,170 @@
+HCLIB_WORKERS=1 ./fib
+
+====== HCArgoLib Runtime Initialized ======
+
+Starting Fib(40)..
+Executing kernel..
+
+======== Kernel execution complete ========
+
+Fib(40) = 102334155
+
+=========== Tabulate Statistics ===========
+
+Kernel execution time = 0.557s
+
+======= HCArgoLib Runtime Finalized =======
+
+HCLIB_WORKERS=2 ./fib
+
+====== HCArgoLib Runtime Initialized ======
+
+Starting Fib(40)..
+Executing kernel..
+
+======== Kernel execution complete ========
+
+Fib(40) = 102334155
+
+=========== Tabulate Statistics ===========
+
+Kernel execution time = 1.989s
+
+======= HCArgoLib Runtime Finalized =======
+
+HCLIB_WORKERS=4 ./fib
+
+====== HCArgoLib Runtime Initialized ======
+
+Starting Fib(40)..
+Executing kernel..
+
+======== Kernel execution complete ========
+
+Fib(40) = 102334155
+
+=========== Tabulate Statistics ===========
+
+Kernel execution time = 1.985s
+
+======= HCArgoLib Runtime Finalized =======
+
+HCLIB_WORKERS=6 ./fib
+
+====== HCArgoLib Runtime Initialized ======
+
+Starting Fib(40)..
+Executing kernel..
+
+======== Kernel execution complete ========
+
+Fib(40) = 102334155
+
+=========== Tabulate Statistics ===========
+
+Kernel execution time = 1.807s
+
+======= HCArgoLib Runtime Finalized =======
+
+HCLIB_WORKERS=8 ./fib
+
+====== HCArgoLib Runtime Initialized ======
+
+Starting Fib(40)..
+Executing kernel..
+
+======== Kernel execution complete ========
+
+Fib(40) = 102334155
+
+=========== Tabulate Statistics ===========
+
+Kernel execution time = 1.696s
+
+======= HCArgoLib Runtime Finalized =======
+
+HCLIB_WORKERS=1 ./fib-reducer
+
+====== HCArgoLib Runtime Initialized ======
+
+Starting Fib(40)..
+Executing kernel..
+
+======== Kernel execution complete ========
+
+Fib(40) = 102334155
+
+=========== Tabulate Statistics ===========
+
+Kernel execution time = 0.491s
+
+======= HCArgoLib Runtime Finalized =======
+
+HCLIB_WORKERS=2 ./fib-reducer
+
+====== HCArgoLib Runtime Initialized ======
+
+Starting Fib(40)..
+Executing kernel..
+
+======== Kernel execution complete ========
+
+Fib(40) = 102334155
+
+=========== Tabulate Statistics ===========
+
+Kernel execution time = 1.883s
+
+======= HCArgoLib Runtime Finalized =======
+
+HCLIB_WORKERS=4 ./fib-reducer
+
+====== HCArgoLib Runtime Initialized ======
+
+Starting Fib(40)..
+Executing kernel..
+
+======== Kernel execution complete ========
+
+Fib(40) = 102334155
+
+=========== Tabulate Statistics ===========
+
+Kernel execution time = 1.740s
+
+======= HCArgoLib Runtime Finalized =======
+
+HCLIB_WORKERS=6 ./fib-reducer
+
+====== HCArgoLib Runtime Initialized ======
+
+Starting Fib(40)..
+Executing kernel..
+
+======== Kernel execution complete ========
+
+Fib(40) = 102334155
+
+=========== Tabulate Statistics ===========
+
+Kernel execution time = 1.676s
+
+======= HCArgoLib Runtime Finalized =======
+
+HCLIB_WORKERS=8 ./fib-reducer
+
+====== HCArgoLib Runtime Initialized ======
+
+Starting Fib(40)..
+Executing kernel..
+
+======== Kernel execution complete ========
+
+Fib(40) = 102334155
+
+=========== Tabulate Statistics ===========
+
+Kernel execution time = 1.737s
+
+======= HCArgoLib Runtime Finalized =======
+

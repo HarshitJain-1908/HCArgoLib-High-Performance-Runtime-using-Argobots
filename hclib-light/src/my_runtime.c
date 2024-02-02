@@ -13,7 +13,7 @@ ABT_pool *pools = NULL;
 static double user_specified_timer = 0;
 
 // int steals = 0, pops = 0, push = 0;
-// pthread_mutex_t mutex;
+pthread_mutex_t mutex;
 // ABT_mutex mutex;
 
 //=========================================== POOL STRUCTURE AND OPERATIONS =====================================================
