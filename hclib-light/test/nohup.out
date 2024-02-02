@@ -11,7 +11,8 @@ Fib(40) = 102334155
 
 =========== Tabulate Statistics ===========
 
-Kernel execution time = 0.557s
+Kernel execution time = 0.634s
+push: 2178308, pops: 2178309, steals: 0
 
 ======= HCArgoLib Runtime Finalized =======
 
@@ -28,7 +29,8 @@ Fib(40) = 102334155
 
 =========== Tabulate Statistics ===========
 
-Kernel execution time = 1.989s
+Kernel execution time = 2.124s
+push: 2178308, pops: 559674, steals: 3421694
 
 ======= HCArgoLib Runtime Finalized =======
 
@@ -45,7 +47,8 @@ Fib(40) = 102334155
 
 =========== Tabulate Statistics ===========
 
-Kernel execution time = 1.985s
+Kernel execution time = 2.275s
+push: 2178308, pops: 1920280, steals: 1030691
 
 ======= HCArgoLib Runtime Finalized =======
 
@@ -62,7 +65,8 @@ Fib(40) = 102334155
 
 =========== Tabulate Statistics ===========
 
-Kernel execution time = 1.807s
+Kernel execution time = 2.078s
+push: 2178308, pops: 2028539, steals: 658566
 
 ======= HCArgoLib Runtime Finalized =======
 
@@ -79,7 +83,8 @@ Fib(40) = 102334155
 
 =========== Tabulate Statistics ===========
 
-Kernel execution time = 1.696s
+Kernel execution time = 2.273s
+push: 2178308, pops: 2071487, steals: 503221
 
 ======= HCArgoLib Runtime Finalized =======
 
@@ -96,7 +101,8 @@ Fib(40) = 102334155
 
 =========== Tabulate Statistics ===========
 
-Kernel execution time = 0.491s
+Kernel execution time = 0.546s
+push: 2178308, pops: 2178309, steals: 0
 
 ======= HCArgoLib Runtime Finalized =======
 
@@ -113,7 +119,8 @@ Fib(40) = 102334155
 
 =========== Tabulate Statistics ===========
 
-Kernel execution time = 1.883s
+Kernel execution time = 1.892s
+push: 2178308, pops: 596338, steals: 3367137
 
 ======= HCArgoLib Runtime Finalized =======
 
@@ -130,7 +137,8 @@ Fib(40) = 102334155
 
 =========== Tabulate Statistics ===========
 
-Kernel execution time = 1.740s
+Kernel execution time = 1.989s
+push: 2178308, pops: 1922623, steals: 1015478
 
 ======= HCArgoLib Runtime Finalized =======
 
@@ -147,7 +155,8 @@ Fib(40) = 102334155
 
 =========== Tabulate Statistics ===========
 
-Kernel execution time = 1.676s
+Kernel execution time = 1.934s
+push: 2178308, pops: 2023827, steals: 664831
 
 ======= HCArgoLib Runtime Finalized =======
 
@@ -164,7 +173,8 @@ Fib(40) = 102334155
 
 =========== Tabulate Statistics ===========
 
-Kernel execution time = 1.737s
+Kernel execution time = 2.356s
+push: 2178308, pops: 2070084, steals: 503246
 
 ======= HCArgoLib Runtime Finalized =======
 
