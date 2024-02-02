@@ -13,6 +13,9 @@
     The runtime dumps the number of asyncs, pops & steals whose updation require use of locks
     by the execution streams that affects the execution time, to get a better performance remove
     those updation and statistics.
+
+    Asyncs, pops & steals counters aren't made volatile intentionally to avoid its overhead
+    as these counts are for our own understanding so need not be exact.
 */
 
 
