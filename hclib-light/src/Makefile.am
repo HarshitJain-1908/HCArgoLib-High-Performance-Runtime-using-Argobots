@@ -17,7 +17,7 @@ libhclib_la_LIBADD =
 
 AM_CXXFLAGS = -L$(ARGOBOTS_INSTALL_DIR)lib -Wl,-rpath,$(ARGOBOTS_INSTALL_DIR)lib
 
-libhclib_la_SOURCES = my_runtime.c hclib_cpp.cpp
+libhclib_la_SOURCES = hcargolib-runtime.c hclib_cpp.cpp
 
 # build hclib
 libhclib_la_CXXFLAGS= $(CXXFLAGS) $(INCLUDES_DIR) $(AM_CXXFLAGS)

@@ -16,14 +16,6 @@
 
 #include "hclib.hpp"
 
-// int hclib::current_worker() {
-//     return hclib_current_worker();
-// }
-
-// int hclib::num_workers() {
-//     return hclib_num_workers();
-// }
-
 void hclib::init(int argc, char** argv) {
   hclib_init(argc, argv);
 }

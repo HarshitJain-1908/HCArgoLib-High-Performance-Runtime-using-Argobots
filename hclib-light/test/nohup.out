@@ -11,8 +11,8 @@ Fib(40) = 102334155
 
 =========== Tabulate Statistics ===========
 
-Kernel execution time = 0.634s
-push: 2178308, pops: 2178309, steals: 0
+Kernel execution time = 0.614s
+Total asyncs: 2178308, Total pops: 2178309, Total steals: 0
 
 ======= HCArgoLib Runtime Finalized =======
 
@@ -29,8 +29,8 @@ Fib(40) = 102334155
 
 =========== Tabulate Statistics ===========
 
-Kernel execution time = 2.124s
-push: 2178308, pops: 559674, steals: 3421694
+Kernel execution time = 2.115s
+Total asyncs: 2178308, Total pops: 515791, Total steals: 3488733
 
 ======= HCArgoLib Runtime Finalized =======
 
@@ -47,8 +47,8 @@ Fib(40) = 102334155
 
 =========== Tabulate Statistics ===========
 
-Kernel execution time = 2.275s
-push: 2178308, pops: 1920280, steals: 1030691
+Kernel execution time = 2.163s
+Total asyncs: 2178308, Total pops: 1915732, Total steals: 1042030
 
 ======= HCArgoLib Runtime Finalized =======
 
@@ -65,8 +65,8 @@ Fib(40) = 102334155
 
 =========== Tabulate Statistics ===========
 
-Kernel execution time = 2.078s
-push: 2178308, pops: 2028539, steals: 658566
+Kernel execution time = 2.232s
+Total asyncs: 2178308, Total pops: 2022409, Total steals: 677820
 
 ======= HCArgoLib Runtime Finalized =======
 
@@ -83,8 +83,8 @@ Fib(40) = 102334155
 
 =========== Tabulate Statistics ===========
 
-Kernel execution time = 2.273s
-push: 2178308, pops: 2071487, steals: 503221
+Kernel execution time = 3.493s
+Total asyncs: 2178308, Total pops: 2063061, Total steals: 528716
 
 ======= HCArgoLib Runtime Finalized =======
 
@@ -101,8 +101,8 @@ Fib(40) = 102334155
 
 =========== Tabulate Statistics ===========
 
-Kernel execution time = 0.546s
-push: 2178308, pops: 2178309, steals: 0
+Kernel execution time = 0.610s
+Total asyncs: 2178308, Total pops: 2178309, Total steals: 0
 
 ======= HCArgoLib Runtime Finalized =======
 
@@ -119,8 +119,8 @@ Fib(40) = 102334155
 
 =========== Tabulate Statistics ===========
 
-Kernel execution time = 1.892s
-push: 2178308, pops: 596338, steals: 3367137
+Kernel execution time = 2.047s
+Total asyncs: 2178308, Total pops: 550398, Total steals: 3445489
 
 ======= HCArgoLib Runtime Finalized =======
 
@@ -137,8 +137,8 @@ Fib(40) = 102334155
 
 =========== Tabulate Statistics ===========
 
-Kernel execution time = 1.989s
-push: 2178308, pops: 1922623, steals: 1015478
+Kernel execution time = 2.620s
+Total asyncs: 2178308, Total pops: 1903994, Total steals: 1064053
 
 ======= HCArgoLib Runtime Finalized =======
 
@@ -155,8 +155,8 @@ Fib(40) = 102334155
 
 =========== Tabulate Statistics ===========
 
-Kernel execution time = 1.934s
-push: 2178308, pops: 2023827, steals: 664831
+Kernel execution time = 2.684s
+Total asyncs: 2178308, Total pops: 2011313, Total steals: 703112
 
 ======= HCArgoLib Runtime Finalized =======
 
@@ -173,8 +173,8 @@ Fib(40) = 102334155
 
 =========== Tabulate Statistics ===========
 
-Kernel execution time = 2.356s
-push: 2178308, pops: 2070084, steals: 503246
+Kernel execution time = 3.482s
+Total asyncs: 2178308, Total pops: 2066394, Total steals: 513615
 
 ======= HCArgoLib Runtime Finalized =======
 
