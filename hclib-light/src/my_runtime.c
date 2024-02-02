@@ -12,8 +12,9 @@ ABT_sched *scheds = NULL;
 ABT_pool *pools = NULL;
 static double user_specified_timer = 0;
 
-int steals = 0, pops = 0, push = 0;
-pthread_mutex_t mutex;
+// int steals = 0, pops = 0, push = 0;
+// pthread_mutex_t mutex;
+// ABT_mutex mutex;
 
 //=========================================== POOL STRUCTURE AND OPERATIONS =====================================================
 
@@ -27,7 +28,8 @@ struct unit_t {
 };
 
 struct pool_t {
-    pthread_mutex_t lock;
+    // pthread_mutex_t lock;
+    ABT_mutex lock;
     unit_t *p_head;
     unit_t *p_tail;
 };
@@ -63,7 +65,8 @@ static ABT_thread pool_pop(ABT_pool pool, ABT_pool_context context)
 
     unit_t *p_unit = NULL;
 
-    pthread_mutex_lock(&p_pool->lock);
+    // pthread_mutex_lock(&p_pool->lock);
+    ABT_mutex_lock(p_pool->lock);
 
     if (p_pool->p_head == NULL){
         // No ULT to execute
@@ -82,7 +85,8 @@ static ABT_thread pool_pop(ABT_pool pool, ABT_pool_context context)
         p_pool->p_head = p_unit->p_prev;
     }
 
-    pthread_mutex_unlock(&p_pool->lock);
+    // pthread_mutex_unlock(&p_pool->lock);
+    ABT_mutex_unlock(p_pool->lock);
 
     if (!p_unit)
         return ABT_THREAD_NULL;
@@ -120,12 +124,13 @@ static int pool_init(ABT_pool pool, ABT_pool_config config)
         return ABT_ERR_MEM;
 
     /* Initialize the spinlock */
-    int ret = pthread_mutex_init(&p_pool->lock, 0);
+    // int ret = pthread_mutex_init(&p_pool->lock, 0);
+    ABT_mutex_create(&p_pool->lock);
 
-    if (ret != 0) {
-        free(p_pool);
-        return ABT_ERR_SYS;
-    }
+    // if (ret != 0) {
+    //     free(p_pool);
+    //     return ABT_ERR_SYS;
+    // }
 
     ABT_pool_set_data(pool, (void *)p_pool);
     return ABT_SUCCESS;
@@ -135,7 +140,8 @@ static void pool_free(ABT_pool pool)
 {
     pool_t *p_pool;
     ABT_pool_get_data(pool, (void **)&p_pool);
-    pthread_mutex_destroy(&p_pool->lock);
+    // pthread_mutex_destroy(&p_pool->lock);
+    ABT_mutex_free(&p_pool->lock);
     free(p_pool);
 }
 
@@ -204,9 +210,11 @@ static void sched_run(ABT_sched sched)
         ABT_pool_pop_thread(pools[0], &thread);
         if (thread != ABT_THREAD_NULL) {
             ABT_self_schedule(thread, ABT_POOL_NULL);
-            pthread_mutex_lock(&mutex);
-            pops++;
-            pthread_mutex_unlock(&mutex);
+            // pthread_mutex_lock(&mutex);
+            // ABT_mutex_lock(mutex);
+            // pops++;
+            // ABT_mutex_unlock(mutex);
+            // pthread_mutex_unlock(&mutex);
         }else if (num_pools > 1) {
             //In case pop fails, try to steal from other pools
 
@@ -215,9 +223,11 @@ static void sched_run(ABT_sched sched)
             ABT_pool_pop_thread(pools[victim_rank], &thread);
             if (thread != ABT_THREAD_NULL) {
                 ABT_self_schedule(thread, pools[victim_rank]);
-                pthread_mutex_lock(&mutex);
-                steals++;
-                pthread_mutex_unlock(&mutex);
+                // pthread_mutex_lock(&mutex);
+                // ABT_mutex_lock(mutex);
+                // steals++;
+                // ABT_mutex_unlock(mutex);
+                // pthread_mutex_unlock(&mutex);
                 // int rank;
                 // ABT_self_get_xstream_rank(&rank);
                 // printf("task stolen by ES: %d\n", rank);
@@ -294,7 +304,8 @@ void hclib_init(int argc, char *argv[]) {
     
     ABT_init(argc, argv);
 
-    pthread_mutex_init(&mutex, NULL);
+    // pthread_mutex_init(&mutex, NULL);
+    // ABT_mutex_create(&mutex);
 
     create_pools(NUM_XSTREAMS, pools);
 
@@ -325,9 +336,11 @@ void hclib_async(generic_frame_ptr fct_ptr, void * arg){
 
     ABT_thread_create(pools[rank], fct_ptr, (void *)arg, ABT_THREAD_ATTR_NULL, &threads);
 
-    pthread_mutex_lock(&mutex);
-    push++;
-    pthread_mutex_unlock(&mutex);
+    // pthread_mutex_lock(&mutex);
+    // ABT_mutex_lock(mutex);
+    // push++;
+    // ABT_mutex_unlock(mutex);
+    // pthread_mutex_unlock(&mutex);
 
     ABT_thread_free(&threads);
 }
@@ -342,13 +355,14 @@ void hclib_finalize() {
         ABT_sched_free(&scheds[i]);
     }
 
-    pthread_mutex_destroy(&mutex);
+    // pthread_mutex_destroy(&mutex);
+    // ABT_mutex_free(&mutex);
 
     ABT_finalize();
 
     printf("\n=========== Tabulate Statistics ===========\n");
     printf("\nKernel execution time = %.3fs\n",user_specified_timer);
-    printf("push: %d, pops: %d, steals: %d\n", push, pops, steals);
+    // printf("push: %d, pops: %d, steals: %d\n", push, pops, steals);
     printf("\n======= HCArgoLib Runtime Finalized =======\n\n");
 }
 
